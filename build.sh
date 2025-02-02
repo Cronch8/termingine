@@ -2,4 +2,4 @@
 
 executableName="termingine"
 
-gcc main.c -o $executableName 
+gcc main.c -o $executableName -Wall
