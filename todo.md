@@ -5,4 +5,4 @@
 
 # todo
 
-- a destroy function to deallocate everything inside a particle layer
+- learn about smart pointers, shared pointers, etc. that migght fix the weird segfault when accessing the layer ptr

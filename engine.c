@@ -2,6 +2,7 @@
 #define ENGINE
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -17,7 +18,6 @@ typedef struct {
     int height;
     int particle_count;
     TE_particle* particles;
-    char data[];
 } TE_particle_layer;
 
 // i'm basically trusting that the compiler will know to optimize out this
@@ -34,25 +34,39 @@ char TE_get_brightness_char(int n) {
     return chars[n];
 }
 
-// makes a particle layer objet, the core object around which all particle operations work
+// Makes a particle layer objet, the core object around which all particle operations work.
+// Returns NULL enough memory can't be allocated.
 TE_particle_layer* TE_create_particle_layer(uint width, uint height, int particle_count) {
-    TE_particle_layer* layer = malloc(sizeof(TE_particle_layer) + width * height * sizeof(char) + sizeof(TE_particle) * particle_count);
-    // check for failed malloc
+    TE_particle_layer* layer = malloc(sizeof(TE_particle_layer));
+    if (!layer) return NULL;
     layer->width = width;
     layer->height = height;
     layer->particle_count = particle_count;
-    memset(layer->data, 0, width * height * sizeof(char));
 
-    layer->particles = malloc(sizeof(TE_particle) * particle_count);
-    // check for failed malloc
-    memset(layer->particles, 0, particle_count * sizeof(TE_particle));
+    layer->particles = calloc(particle_count, sizeof(TE_particle));
+    if (!layer->particles) {
+        free(layer);
+        return NULL;
+    }
     return layer;
+}
+
+void TE_destory_particle_layer(TE_particle_layer* layer) {
+    free(layer->particles);// is this correct? is it freeing the whole array?
+    free(layer);
 }
 
 // update is the fn provided by the user that will update each particle once.
 // Can be used to initialize the particles in specific postions too.
 void TE_update_particles(TE_particle_layer* layer, void (*update)(TE_particle_layer*, TE_particle*)) {
+    printf("nnnn");
+    fflush(stdout);
+    printf("%d", layer->particle_count);
+    printf("wwww");
+    fflush(stdout);
     for (int i = 0; i < layer->particle_count; i++) {
+        printf(">%d", i);
+        fflush(stdout);
         update(layer, &layer->particles[i]);
     }
 }
