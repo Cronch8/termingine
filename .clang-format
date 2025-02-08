@@ -1,0 +1,56 @@
+# Clang-Format Configuration for a Pure C Project
+# (written mostly by AI)
+
+# This file configures clang-format to enforce a consistent code style
+# in your C project.  It uses 4-space indentation and provides
+# options for easy customization.
+
+---
+#Language: C  # Specifies that this is a C project
+
+# Indentation settings
+IndentWidth: 4  # Use 4 spaces for indentation
+TabWidth: 4     # Width of a tab character (should match IndentWidth)
+UseTab: Never   # Never use tab characters for indentation (use spaces)
+# UseTab: Always 
+
+# Column limit
+ColumnLimit: 80  # Maximum line length (adjust as needed)
+
+# Brace style
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: Always  # Braces after if/else/for/while
+  AfterEnum: false
+  AfterFunction: true   # Braces after function definitions
+  AfterNamespace: false
+  AfterStruct: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false  # Don't indent braces
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+# Spaces
+SpaceAfterCStyleCast: true  # Add space after C-style casts
+SpaceBeforeParens: ControlStatements # Add space before parens in control statements
+# SpaceBeforeParens: Never
+
+# Pointer and reference alignment
+PointerAlignment: Left  # Align pointers to the left (e.g., `int* ptr`)
+# PointerAlignment: Right 
+# PointerAlignment: Middle
+
+# Other settings
+AlignConsecutiveAssignments: false # Don't align consecutive assignments
+AlignConsecutiveDeclarations: false # Don't align consecutive declarations
+AlignTrailingComments: true # Align trailing comments
+BreakBeforeBinaryOperators: false # Break before binary operators except assignment
+# BreakBeforeBinaryOperators: All # Uncomment to always break before binary operators
+PenaltyExcessCharacter: 20 # Penalty for lines exceeding the column limit
+PenaltyReturnTypeOnItsOwnLine: 20 # Penalty for putting the return type on its own line
+
+# EndOfLine: LF # Uncomment to enforce LF line endings (Linux/macOS)
+# EndOfLine: CRLF # Uncomment to enforce CRLF line endings (Windows)
+
