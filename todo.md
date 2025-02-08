@@ -5,4 +5,6 @@
 
 # todo
 
-- a destroy function to deallocate everything inside a particle layer
+- fix memory corruption on resizing the terminal
+- have entity brightnesses add, not overwrite
+- display multiple layers of effects

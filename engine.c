@@ -1,6 +1,7 @@
 #ifndef ENGINE
 #define ENGINE
 
+#include <ncurses.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,9 +14,15 @@ typedef struct {
 } TE_particle;
 
 typedef struct {
+    uint x;
+    uint y;
+} TE_point;
+
+typedef struct {
     int width;
     int height;
     int particle_count;
+    TE_particle* prev_locations;
     TE_particle* particles;
 } TE_particle_layer;
 
@@ -28,26 +35,39 @@ char TE_get_brightness_char(int n) {
     for (int i = 0; chars[i] != '\0'; i++) {
         length = i;
     }
-    if (n > length)
+    if (n > length) {
         return chars[length];
-    if (n < 0)
+    }
+    if (n < 0) {
         return chars[0];
+    }
     return chars[n];
 }
 
+void TE_init() { initscr(); }
+
+void TE_finish() { endwin(); }
+
 // Makes a particle layer objet, the core object around which all particle
 // operations work. Returns NULL enough memory can't be allocated.
-TE_particle_layer*
-TE_create_particle_layer(uint width, uint height, int particle_count) {
+TE_particle_layer* TE_create_particle_layer(int particle_count) {
     TE_particle_layer* layer = malloc(sizeof(TE_particle_layer));
-    if (!layer)
+    if (!layer) {
         return NULL;
-    layer->width = width;
-    layer->height = height;
+    }
+    layer->prev_locations = calloc(particle_count, sizeof(TE_point));
+    if (!layer->prev_locations) {
+        free(layer);
+        return NULL;
+    }
+
+    getmaxyx(stdscr, layer->height, layer->width);
     layer->particle_count = particle_count;
 
     layer->particles = calloc(particle_count, sizeof(TE_particle));
     if (!layer->particles) {
+        // is this correct? is it freeing the whole layer?
+        free(layer->prev_locations);
         free(layer);
         return NULL;
     }
@@ -55,7 +75,9 @@ TE_create_particle_layer(uint width, uint height, int particle_count) {
 }
 
 void TE_destory_particle_layer(TE_particle_layer* layer) {
-    free(layer->particles); // is this correct? is it freeing the whole array?
+    // is this correct? is it freeing the whole array?
+    free(layer->prev_locations);
+    free(layer->particles);
     free(layer);
 }
 
@@ -63,6 +85,8 @@ void TE_destory_particle_layer(TE_particle_layer* layer) {
 // Can be used to initialize the particles in specific postions too.
 void TE_update_particles(TE_particle_layer* layer,
                          void (*update)(TE_particle_layer*, TE_particle*)) {
+    // ideally terminal size would be updated not each update but on resize event
+    getmaxyx(stdscr, layer->height, layer->width);
     for (int i = 0; i < layer->particle_count; i++) {
         update(layer, &layer->particles[i]);
     }
@@ -70,15 +94,18 @@ void TE_update_particles(TE_particle_layer* layer,
 
 // return the array of chars for the whole window.
 // Chars needs to be at least width*height*sizeof(char) in size
-void TE_calculate_chars(TE_particle_layer* layer, char* chars) {
-    memset(chars, 0, layer->height * layer->width * sizeof(char));
+void TE_display(TE_particle_layer* layer) {
+    getmaxyx(stdscr, layer->height, layer->width);
+    char particle;
     for (int i = 0; i < layer->particle_count; i++) {
-        chars[layer->particles[i].y * layer->width + layer->particles[i].x] +=
-            layer->particles[i].brightness;
+        mvaddch(layer->prev_locations[i].y, layer->prev_locations[i].x, ' ');
+        particle = TE_get_brightness_char(layer->particles[i].brightness);
+        mvaddch(layer->particles[i].y, layer->particles[i].x, particle);
+        layer->prev_locations[i].x = layer->particles[i].x;
+        layer->prev_locations[i].y = layer->particles[i].y;
     }
-    for (int i = 0; i < layer->width * layer->height; i++) {
-        chars[i] = TE_get_brightness_char(chars[i]);
-    }
+    move(0, 0);
+    refresh();
 }
 
 #endif

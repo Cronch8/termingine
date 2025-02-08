@@ -1,10 +1,12 @@
-Termingine _(pronounced term-in-chin)_ or The Terminal Engine is a small not-quite-game-engine that can be used to create fancy terminal effects
+# Termingine
+
+A small engine for producing fancy effects in the terminal
 
 ---
 
-Planned features:
+#### Planned features (in order of priority)
 
-- Particle effects
-- Basic physics
-- Colors
+- display multiple layers of effects
 - custom character-brigghtness pairings
+- Colors
+- Basic physics

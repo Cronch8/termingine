@@ -1,56 +1,51 @@
 #include "engine.c"
+#include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <time.h>
 
-uint width = 240;
-uint height = 55;
-
 void set_random_particle(TE_particle_layer* layer, TE_particle* particle) {
-    particle->x = random() % width;
-    particle->y = random() % height;
+    particle->x = random() % layer->width;
+    particle->y = random() % layer->height;
     // 13 is the number of chars in the " .-:=csZ58#M@" brightness string
     particle->brightness = random() % 13;
 }
 
-void decay_particle(TE_particle_layer* layer, TE_particle* particle) {
+void drip_water(TE_particle_layer* layer, TE_particle* particle) {
+    if (random() % 8 > 1) {
+        return;
+    }
     if (particle->brightness <= 0) {
-        particle->x = random() % width;
+        particle->x = random() % layer->width;
         particle->y = 0;
-        particle->brightness = random() % 18 + 5;
-    } else
-        particle->brightness -= 1;
-    if (particle->y >= layer->height)
+        // 13 is the number of chars in the " .-:=csZ58#M@" brightness string
+        particle->brightness = 13;
+    } else {
+        particle->brightness -= random() % 2;
+    }
+    if (particle->y >= layer->height) {
         particle->y = 0;
-    else
-        particle->y += 1;
+    } else {
+        particle->y += random() % 2;
+    }
 }
 
 int main() {
+    TE_init();
     time_t timer = 0;
     time(&timer);
-    printf("testinng ");
-    fflush(stdout);
-    printf("time: %ld ", timer);
-    fflush(stdout);
     srand(timer);
-    TE_particle_layer* layer = TE_create_particle_layer(width, height, 100);
+    TE_particle_layer* layer = TE_create_particle_layer(100);
     TE_update_particles(layer, set_random_particle);
-    int size = width * height * sizeof(char);
-    char* window_chars = calloc(size + 1, sizeof(char));
-    window_chars[size] = '\0';
     struct timespec ts;
-    double dt = 0.033;
+    double dt = 1.0 / 60.0;
     ts.tv_sec = dt;
     ts.tv_nsec = (int) (dt * 1000000000) % 1000000000;
     while (1) {
-        TE_update_particles(layer, decay_particle);
-        TE_calculate_chars(layer, window_chars);
-        window_chars[size] = '\0';
-        printf("%s", window_chars);
-        fflush(stdout);
+        TE_update_particles(layer, drip_water);
+        TE_display(layer);
         nanosleep(&ts, &ts);
     }
-    free(window_chars);
+    TE_finish();
 }
