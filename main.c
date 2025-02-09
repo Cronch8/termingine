@@ -1,14 +1,25 @@
 #include "engine.c"
 #include <ncurses.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <time.h>
 
 void set_random_particle(TE_particle_effect* effect, TE_particle* particle) {
     particle->x = random() % effect->width;
     particle->y = random() % effect->height;
-    // 13 is the number of chars in the " .-:=csZ58#M@" brightness string
-    particle->brightness = random() % 13;
+    particle->brightness = strlen(effect->brightness_str);
+}
+
+void explosion(TE_particle_effect* effect, TE_particle* particle) {
+    if (particle->brightness <= 0) {
+        particle->brightness = strlen(effect->brightness_str);
+        particle->x = effect->width / 2;
+        particle->y = effect->height / 2;
+        particle->vx = 4 - random() % 8;
+        particle->vy = 4 - random() % 8;
+    }
+    particle->brightness--;
 }
 
 void drip_water(TE_particle_effect* effect, TE_particle* particle) {
@@ -18,8 +29,9 @@ void drip_water(TE_particle_effect* effect, TE_particle* particle) {
     if (particle->brightness <= 0) {
         particle->x = random() % effect->width;
         particle->y = 0;
-        // 13 is the number of chars in the " .-:=csZ58#M@" brightness string
-        particle->brightness = 13;
+        particle->vx = 0;
+        particle->vy = 0;
+        particle->brightness = strlen(effect->brightness_str) + 1;
     } else {
         particle->brightness -= random() % 2;
     }
@@ -42,7 +54,7 @@ int main() {
     ts.tv_sec = dt;
     ts.tv_nsec = (int) (dt * 1000000000) % 1000000000;
     while (1) {
-        TE_update_particle_effect(effect, drip_water);
+        TE_update_particle_effect(effect, explosion);
         TE_display(effect);
         nanosleep(&ts, &ts);
     }

@@ -8,8 +8,10 @@
 #include <sys/types.h>
 
 typedef struct {
-    uint x;
-    uint y;
+    int x;
+    int y;
+    int vx;
+    int vy;
     uint brightness;
 } TE_particle;
 
@@ -22,7 +24,8 @@ typedef struct {
     int width;
     int height;
     int particle_count;
-    TE_particle* prev_locations;
+    char brightness_str[60];
+    TE_point* prev_locations;
     TE_particle* particles;
 } TE_particle_effect;
 
@@ -60,18 +63,22 @@ TE_particle_effect* TE_create_particle_effect(int particle_count) {
         free(effect);
         return NULL;
     }
-
-    getmaxyx(stdscr, effect->height, effect->width);
-    effect->particle_count = particle_count;
-
     effect->particles = calloc(particle_count, sizeof(TE_particle));
     if (!effect->particles) {
-        // is this correct? is it freeing the whole effect
         free(effect->prev_locations);
         free(effect);
         return NULL;
     }
+
+    getmaxyx(stdscr, effect->height, effect->width);
+    effect->particle_count = particle_count;
+    strcpy(effect->brightness_str, " .-:=csZ58#M@");
     return effect;
+}
+
+void TE_set_particle_effect_chars(TE_particle_effect* effect, char* str) {
+    *effect->brightness_str = '\0';
+    strncpy(effect->brightness_str, str, strlen(str));
 }
 
 void TE_destory_particle_effect(TE_particle_effect* effect) {
@@ -81,14 +88,27 @@ void TE_destory_particle_effect(TE_particle_effect* effect) {
     free(effect);
 }
 
-// update is the fn provided by the user that will update each particle once.
-// Can be used to initialize the particles in specific postions too.
+// update is the fn provided by the user that will update each particle
+// once. Can be used to initialize the particles in specific postions too.
 void TE_update_particle_effect(TE_particle_effect* effect,
                                void (*update)(TE_particle_effect*,
                                               TE_particle*)) {
     // ideally terminal size would be updated not each update but on resize event
     getmaxyx(stdscr, effect->height, effect->width);
     for (int i = 0; i < effect->particle_count; i++) {
+        // assumes that velocity will not be bigger than screen size
+        effect->particles[i].y += effect->particles[i].vy;
+        if (effect->particles[i].y > effect->width) {
+            effect->particles[i].y -= effect->width;
+        } else if (effect->particles[i].y < 0) {
+            effect->particles[i].y += effect->width;
+        }
+        effect->particles[i].x += effect->particles[i].vx;
+        if (effect->particles[i].x > effect->width) {
+            effect->particles[i].x -= effect->width;
+        } else if (effect->particles[i].x < 0) {
+            effect->particles[i].x += effect->width;
+        }
         update(effect, &effect->particles[i]);
     }
 }
