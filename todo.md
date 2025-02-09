@@ -7,4 +7,4 @@
 
 - fix memory corruption on resizing the terminal
 - have entity brightnesses add, not overwrite
-- display multiple layers of effects
+- display multiple effects at once

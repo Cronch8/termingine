@@ -5,14 +5,14 @@
 #include <sys/types.h>
 #include <time.h>
 
-void set_random_particle(TE_particle_layer* layer, TE_particle* particle) {
+void set_random_particle(TE_particle_effect* layer, TE_particle* particle) {
     particle->x = random() % layer->width;
     particle->y = random() % layer->height;
     // 13 is the number of chars in the " .-:=csZ58#M@" brightness string
     particle->brightness = random() % 13;
 }
 
-void drip_water(TE_particle_layer* layer, TE_particle* particle) {
+void drip_water(TE_particle_effect* layer, TE_particle* particle) {
     if (random() % 8 > 1) {
         return;
     }
@@ -36,7 +36,7 @@ int main() {
     time_t timer = 0;
     time(&timer);
     srand(timer);
-    TE_particle_layer* layer = TE_create_particle_layer(100);
+    TE_particle_effect* layer = TE_create_particle_layer(100);
     TE_update_particles(layer, set_random_particle);
     struct timespec ts;
     double dt = 1.0 / 60.0;

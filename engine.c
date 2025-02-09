@@ -24,7 +24,7 @@ typedef struct {
     int particle_count;
     TE_particle* prev_locations;
     TE_particle* particles;
-} TE_particle_layer;
+} TE_particle_effect;
 
 // i'm basically trusting that the compiler will know to optimize out this
 // loop here, else this will be slow.
@@ -50,8 +50,8 @@ void TE_finish() { endwin(); }
 
 // Makes a particle layer objet, the core object around which all particle
 // operations work. Returns NULL enough memory can't be allocated.
-TE_particle_layer* TE_create_particle_layer(int particle_count) {
-    TE_particle_layer* layer = malloc(sizeof(TE_particle_layer));
+TE_particle_effect* TE_create_particle_layer(int particle_count) {
+    TE_particle_effect* layer = malloc(sizeof(TE_particle_effect));
     if (!layer) {
         return NULL;
     }
@@ -74,7 +74,7 @@ TE_particle_layer* TE_create_particle_layer(int particle_count) {
     return layer;
 }
 
-void TE_destory_particle_layer(TE_particle_layer* layer) {
+void TE_destory_particle_layer(TE_particle_effect* layer) {
     // is this correct? is it freeing the whole array?
     free(layer->prev_locations);
     free(layer->particles);
@@ -83,8 +83,8 @@ void TE_destory_particle_layer(TE_particle_layer* layer) {
 
 // update is the fn provided by the user that will update each particle once.
 // Can be used to initialize the particles in specific postions too.
-void TE_update_particles(TE_particle_layer* layer,
-                         void (*update)(TE_particle_layer*, TE_particle*)) {
+void TE_update_particles(TE_particle_effect* layer,
+                         void (*update)(TE_particle_effect*, TE_particle*)) {
     // ideally terminal size would be updated not each update but on resize event
     getmaxyx(stdscr, layer->height, layer->width);
     for (int i = 0; i < layer->particle_count; i++) {
@@ -94,7 +94,7 @@ void TE_update_particles(TE_particle_layer* layer,
 
 // return the array of chars for the whole window.
 // Chars needs to be at least width*height*sizeof(char) in size
-void TE_display(TE_particle_layer* layer) {
+void TE_display(TE_particle_effect* layer) {
     getmaxyx(stdscr, layer->height, layer->width);
     char particle;
     for (int i = 0; i < layer->particle_count; i++) {
