@@ -8,16 +8,16 @@
 #include <sys/types.h>
 
 typedef struct {
-    int x;
-    int y;
-    int vx;
-    int vy;
+    float x;
+    float y;
+    float vx;
+    float vy;
     uint brightness;
 } TE_particle;
 
 typedef struct {
-    uint x;
-    uint y;
+    float x;
+    float y;
 } TE_point;
 
 typedef struct {
@@ -69,7 +69,6 @@ TE_particle_effect* TE_create_particle_effect(int particle_count) {
         free(effect);
         return NULL;
     }
-
     getmaxyx(stdscr, effect->height, effect->width);
     effect->particle_count = particle_count;
     strcpy(effect->brightness_str, " .-:=csZ58#M@");
@@ -97,7 +96,7 @@ void TE_update_particle_effect(TE_particle_effect* effect,
     getmaxyx(stdscr, effect->height, effect->width);
     for (int i = 0; i < effect->particle_count; i++) {
         // assumes that velocity will not be bigger than screen size
-        effect->particles[i].y += effect->particles[i].vy;
+        effect->particles[i].y += effect->particles[i].vy / 2;
         if (effect->particles[i].y > effect->width) {
             effect->particles[i].y -= effect->width;
         } else if (effect->particles[i].y < 0) {
@@ -113,8 +112,6 @@ void TE_update_particle_effect(TE_particle_effect* effect,
     }
 }
 
-// return the array of chars for the whole window.
-// Chars needs to be at least width*height*sizeof(char) in size
 void TE_display(TE_particle_effect* effect) {
     getmaxyx(stdscr, effect->height, effect->width);
     char particle;
