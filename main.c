@@ -7,6 +7,20 @@
 
 #define frand() ((float) random() / ((float) RAND_MAX))
 
+#define max(a, b)                                                              \
+    ({                                                                         \
+        __typeof__(a) _a = (a);                                                \
+        __typeof__(b) _b = (b);                                                \
+        _a > _b ? _a : _b;                                                     \
+    })
+
+#define min(a, b)                                                              \
+    ({                                                                         \
+        __typeof__(a) _a = (a);                                                \
+        __typeof__(b) _b = (b);                                                \
+        _a < _b ? _a : _b;                                                     \
+    })
+
 void set_zero(TE_particle_effect* effect, TE_particle* particle) {
     particle->x = 0;
     particle->y = 0;
@@ -30,11 +44,15 @@ void explode_particle_center(TE_particle_effect* effect, TE_particle* particle) 
 }
 
 void bounce_fade(TE_particle_effect* effect, TE_particle* particle) {
-    if (particle->x >= effect->width || particle->x <= 0) {
+    if (particle->x + particle->vx >= effect->width ||
+        particle->x + particle->vx <= 0) {
         particle->vx = -particle->vx;
+        particle->x += particle->vx;
     }
-    if (particle->y >= effect->height || particle->y <= 0) {
+    if (particle->y + particle->vy >= effect->height ||
+        particle->y + particle->vy <= 0) {
         particle->vy = -particle->vy;
+        particle->y += particle->vy;
     }
     if (random() % 10 == 0) {
         particle->brightness--;
@@ -75,7 +93,7 @@ int main() {
     ts.tv_nsec = (int) (dt * 1000000000) % 1000000000;
     int count = 0;
     while (1) {
-        if (count > (int) (3.0 / dt)) {
+        if (count > (int) (3.5 / dt)) {
             count = 0;
             TE_update_particle_effect(effect, explode_particle_center);
         }

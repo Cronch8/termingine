@@ -97,10 +97,10 @@ void TE_update_particle_effect(TE_particle_effect* effect,
     for (int i = 0; i < effect->particle_count; i++) {
         // assumes that velocity will not be bigger than screen size
         effect->particles[i].y += effect->particles[i].vy / 2;
-        if (effect->particles[i].y > effect->width) {
-            effect->particles[i].y -= effect->width;
+        if (effect->particles[i].y > effect->height) {
+            effect->particles[i].y -= effect->height;
         } else if (effect->particles[i].y < 0) {
-            effect->particles[i].y += effect->width;
+            effect->particles[i].y += effect->height;
         }
         effect->particles[i].x += effect->particles[i].vx;
         if (effect->particles[i].x > effect->width) {
