@@ -7,4 +7,3 @@
 
 - fix memory corruption on resizing the terminal
 - have entity brightnesses add, not overwrite
-- display multiple effects at once

@@ -10,7 +10,6 @@ The main.c file is mainly for testing the engine. Currenly it has a few function
 
 ordered aproximately by priority
 
-- display multiple effects at once
 - non-predefined quantity of particles
 - Basic colision physics
 - Colors

@@ -15,7 +15,7 @@ UseTab: Never   # Never use tab characters for indentation (use spaces)
 # UseTab: Always 
 
 # Column limit
-ColumnLimit: 80  # Maximum line length (adjust as needed)
+ColumnLimit: 90  # Maximum line length (adjust as needed)
 
 # Brace style
 BraceWrapping:

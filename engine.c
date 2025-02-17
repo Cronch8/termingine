@@ -75,11 +75,14 @@ TE_particle_effect* TE_create_particle_effect(int particle_count) {
     return effect;
 }
 
+// sets the array of characters that will be used as brightness.
+// Default is: " .-:=csZ58#M@`
 void TE_set_particle_effect_chars(TE_particle_effect* effect, char* str) {
     *effect->brightness_str = '\0';
     strncpy(effect->brightness_str, str, strlen(str));
 }
 
+// frees the whole effect
 void TE_destory_particle_effect(TE_particle_effect* effect) {
     // is this correct? is it freeing the whole array?
     free(effect->prev_locations);
@@ -87,11 +90,10 @@ void TE_destory_particle_effect(TE_particle_effect* effect) {
     free(effect);
 }
 
-// update is the fn provided by the user that will update each particle
-// once. Can be used to initialize the particles in specific postions too.
+// updates all particles and calls the `update` function on each particle in the effect.
 void TE_update_particle_effect(TE_particle_effect* effect,
-                               void (*update)(TE_particle_effect*,
-                                              TE_particle*)) {
+                               void (*update)(TE_particle_effect*, TE_particle*, void*),
+                               void* shared_data) {
     // ideally terminal size would be updated not each update but on resize event
     getmaxyx(stdscr, effect->height, effect->width);
     for (int i = 0; i < effect->particle_count; i++) {
@@ -108,12 +110,12 @@ void TE_update_particle_effect(TE_particle_effect* effect,
         } else if (effect->particles[i].x < 0) {
             effect->particles[i].x += effect->width;
         }
-        update(effect, &effect->particles[i]);
+        update(effect, &effect->particles[i], shared_data);
     }
 }
 
+// Displays the current state of the particles on the screen
 void TE_display(TE_particle_effect* effect) {
-    getmaxyx(stdscr, effect->height, effect->width);
     char particle;
     for (int i = 0; i < effect->particle_count; i++) {
         mvaddch(effect->prev_locations[i].y, effect->prev_locations[i].x, ' ');
@@ -121,6 +123,26 @@ void TE_display(TE_particle_effect* effect) {
         mvaddch(effect->particles[i].y, effect->particles[i].x, particle);
         effect->prev_locations[i].x = effect->particles[i].x;
         effect->prev_locations[i].y = effect->particles[i].y;
+    }
+    move(0, 0);
+    refresh();
+}
+
+// Displays the current state of all of the provided particle effects on the screen
+void TE_display_multiple(TE_particle_effect effect[], int effect_count) {
+    char particle;
+    for (int i = 0; i < effect_count; i++) {
+        for (int j = 0; j < effect[i].particle_count; j++) {
+            mvaddch(effect[i].prev_locations[j].y, effect[i].prev_locations[j].x, ' ');
+        }
+    }
+    for (int i = 0; i < effect_count; i++) {
+        for (int j = 0; j < effect[i].particle_count; j++) {
+            particle = TE_get_brightness_char(effect[i].particles[j].brightness);
+            mvaddch(effect[i].particles[j].y, effect[i].particles[j].x, particle);
+            effect[i].prev_locations[j].x = effect[i].particles[j].x;
+            effect[i].prev_locations[j].y = effect[i].particles[j].y;
+        }
     }
     move(0, 0);
     refresh();
