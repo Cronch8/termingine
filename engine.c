@@ -7,6 +7,9 @@
 #include <string.h>
 #include <sys/types.h>
 
+#define MAX_BRIGHT_LEN 69
+#define DEFAULT_BRIGHTNESS_STR " .-:=csZ58#M@"
+
 typedef struct {
     float x;
     float y;
@@ -24,7 +27,7 @@ typedef struct {
     int width;
     int height;
     int particle_count;
-    char brightness_str[60];
+    char brightness_str[MAX_BRIGHT_LEN];
     TE_point* prev_locations;
     TE_particle* particles;
 } TE_particle_effect;
@@ -32,19 +35,22 @@ typedef struct {
 // i'm basically trusting that the compiler will know to optimize out this
 // loop here, else this will be slow.
 // Returns the ascii character representing it's brightness. By default has 13 characters.
-char TE_get_brightness_char(int n) {
-    char* chars = " .-:=csZ58#M@";
+char TE_get_brightness_char(TE_particle_effect* effect, int n) {
     int length = 0;
-    for (int i = 0; chars[i] != '\0'; i++) {
+    for (int i = 0; effect->brightness_str[i] != '\0'; i++) {
         length = i;
     }
     if (n > length) {
-        return chars[length];
+        return effect->brightness_str[length];
     }
     if (n < 0) {
-        return chars[0];
+        return effect->brightness_str[0];
     }
-    return chars[n];
+    return effect->brightness_str[n];
+}
+
+void TE_set_brightness_str(TE_particle_effect* effect, char* str) {
+    strncpy(&effect->brightness_str, str, MAX_BRIGHT_LEN);
 }
 
 void TE_init() { initscr(); }
@@ -71,7 +77,7 @@ TE_particle_effect* TE_create_particle_effect(int particle_count) {
     }
     getmaxyx(stdscr, effect->height, effect->width);
     effect->particle_count = particle_count;
-    strcpy(effect->brightness_str, " .-:=csZ58#M@");
+    strcpy(effect->brightness_str, DEFAULT_BRIGHTNESS_STR);
     return effect;
 }
 
@@ -119,7 +125,7 @@ void TE_display(TE_particle_effect* effect) {
     char particle;
     for (int i = 0; i < effect->particle_count; i++) {
         mvaddch(effect->prev_locations[i].y, effect->prev_locations[i].x, ' ');
-        particle = TE_get_brightness_char(effect->particles[i].brightness);
+        particle = TE_get_brightness_char(effect, effect->particles[i].brightness);
         mvaddch(effect->particles[i].y, effect->particles[i].x, particle);
         effect->prev_locations[i].x = effect->particles[i].x;
         effect->prev_locations[i].y = effect->particles[i].y;
@@ -138,7 +144,7 @@ void TE_display_multiple(TE_particle_effect effect[], int effect_count) {
     }
     for (int i = 0; i < effect_count; i++) {
         for (int j = 0; j < effect[i].particle_count; j++) {
-            particle = TE_get_brightness_char(effect[i].particles[j].brightness);
+            particle = TE_get_brightness_char(effect, effect[i].particles[j].brightness);
             mvaddch(effect[i].particles[j].y, effect[i].particles[j].x, particle);
             effect[i].prev_locations[j].x = effect[i].particles[j].x;
             effect[i].prev_locations[j].y = effect[i].particles[j].y;
